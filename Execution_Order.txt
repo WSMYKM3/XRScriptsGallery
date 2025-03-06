@@ -1,0 +1,15 @@
+void Awake() – Called once when the script instance is loaded, before Start(). Used for initialization that doesn’t depend on other scripts.
+
+void OnEnable() – Called when the object becomes active/enabled.
+
+void Start() – Called before the first frame update, after Awake(), and only if the script is enabled.
+
+void FixedUpdate() – Called at fixed time intervals, used for physics updates.
+
+void Update() – Called once per frame.
+
+void LateUpdate() – Called after Update(), used for things like camera following to ensure all movement calculations are completed.
+
+void OnDisable() – Called when the object is disabled.
+
+void OnDestroy() – Called when the object is destroyed.
