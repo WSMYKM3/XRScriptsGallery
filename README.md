@@ -4,4 +4,5 @@ Credit as "Github: WSMYKM3"
 
 ##Folder name and Tips:  
 1.DestructiableGlobaMeshManager:  Use both scripts to destruct environment, "raygun.OnShootAndHit" is a trigger function  
+2.PlayStepinTimeline is for narrative timeline, where UnityEvent acts important part to trigger .invoke() to proceed the PlaySteps[index] at a set starting time   
 
