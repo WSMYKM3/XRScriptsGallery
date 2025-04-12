@@ -13,14 +13,15 @@ public class MovementRecognizer : MonoBehaviour
 {
     public XRNode inputSource;//it is set in inspector with right hand now, but can be changed
     public UnityEngine.XR.Interaction.Toolkit.InputHelpers.Button inputButton;
-    public float inputThreshold = 0.1f;
+    public float inputThreshold = 0.1f;//the power trigger the button
     public Transform movementSource;//add to positionsList list, need to set in inspector, right hand controller now
 
     public float newPositionThresholdDistance = 0.05f;//only exceed this threshhold, the new movementSource.position will be add to list
+
     public GameObject debugCubePrefab;//this is instantiated in StartMovement()
 
     //Creation Mode and set its name
-    public bool creationMode = true;//check in inspector if it is set to trye first, if recognize mode, then uncheck it
+    public bool creationMode = false;//check in inspector if it is set to trye first, if recognize mode, then uncheck it
     public string newGestureName;
 
     public float recognitionThreshold = 0.9f;
@@ -31,9 +32,9 @@ public class MovementRecognizer : MonoBehaviour
     
     [System.Serializable]
     public class UnityStringEvent : UnityEvent<string> { }
-    public UnityStringEvent OnRecognized;//this is thge grey event box in inspector, and here I set it trigger OnRecognized.Invoke() in recognize mode
+    public UnityStringEvent OnRecognized;//this is the grey event box in inspector, and here I set it trigger OnRecognized.Invoke() in recognize mode
 
-    private List<Gesture> trainingSet = new List<Gesture>();//initialize
+    private List<Gesture> trainingSet = new List<Gesture>();//must initialize first
     private bool isMoving = false;
     private List<Vector3> positionsList = new List<Vector3>();//add to UpdateMovement(), and also use its postion to add to a Point list []
     private int strokeID = 0;
@@ -41,14 +42,14 @@ public class MovementRecognizer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //THIS 3 LIENS ARE NOT FROM THE VIDEO AND ARE ADDED TO ADD PREMADE GESTURES MADE DURING TUTORIAL
-        //THAT ARE NOT IN YOUR FILES YET
+        //Load Premade gesture which are .xml file
+        //it is stored in Asset/Resources in this project
         TextAsset[] gesturesXml = Resources.LoadAll<TextAsset>("GestureSet/");
         foreach (TextAsset gestureXml in gesturesXml)
             trainingSet.Add(GestureIO.ReadGestureFromXML(gestureXml.text));
 
         //find all files with .xml, this is for loading at start
-        //foreach here is to add xml to trainningset
+        //foreach here is to add xml to trainningset at start
         string[] gestureFiles = Directory.GetFiles(Application.persistentDataPath, "*.xml");
         foreach (var item in gestureFiles)
         {
@@ -108,6 +109,7 @@ public class MovementRecognizer : MonoBehaviour
         //Create The Gesture FRom The Position List with the positionsList
         Point[] pointArray = new Point[positionsList.Count];
 
+        //Store the positionList'vector datas to pointArray
         for (int i = 0; i < positionsList.Count; i++)
         {
             //transform the points from 3d to 2d because algorithm only works in 2d with WorldToScreenPoint
@@ -115,6 +117,7 @@ public class MovementRecognizer : MonoBehaviour
             pointArray[i] = new Point(screenPoint.x, screenPoint.y, 0);
         }
 
+        //this Gesture is a PDollarGestureRecognizer's class, and it is point array, so trainingset below needs to .ToArray()
         Gesture newGesture = new Gesture(pointArray);
 
         //Add A new gesture to training set
@@ -130,6 +133,7 @@ public class MovementRecognizer : MonoBehaviour
         //recognize mode and this will give feedback according the input
         else
         {
+            //Result is a PDollarGestureRecognizer's class, so as PointCloudRecognizer.Classify
             Result result = PointCloudRecognizer.Classify(newGesture, trainingSet.ToArray());
             Debug.Log(result.GestureClass + result.Score);
             if(result.Score > recognitionThreshold)
@@ -145,7 +149,8 @@ public class MovementRecognizer : MonoBehaviour
         Debug.Log("Update Movement");
         Vector3 lastPosition = positionsList[positionsList.Count - 1];
 
-        if(Vector3.Distance(movementSource.position,lastPosition) > newPositionThresholdDistance)
+        ////only exceed this threshhold, the new movementSource.position will be add to list
+        if (Vector3.Distance(movementSource.position,lastPosition) > newPositionThresholdDistance)
         {
             positionsList.Add(movementSource.position);
             if (debugCubePrefab)
